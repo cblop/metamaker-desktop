@@ -1,0 +1,1 @@
+nohup ./fuseki-server --port 8080 --loc=/home/mrt32/refit-tdb /refit &

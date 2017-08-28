@@ -1,0 +1,59 @@
+@prefix fuseki:  <http://jena.apache.org/fuseki#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix tdb:     <http://jena.hpl.hp.com/2008/tdb#> .
+@prefix ja:      <http://jena.hpl.hp.com/2005/11/Assembler#> .
+@prefix :        <#> .
+
+[] rdf:type fuseki:Server ;
+   # Server-wide context parameters can be given here.
+   # For example, to set query timeouts: on a server-wide basis:
+   # Format 1: "1000" -- 1 second timeout
+   # Format 2: "10000,60000" -- 10s timeout to first result, then 60s timeout to for rest of query.
+   # See java doc for ARQ.queryTimeout
+   # ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "10000" ] ;
+
+   # Load custom code (rarely needed)
+   # ja:loadClass "your.code.Class" ;
+
+   # Services available.  Only explicitly listed services are configured.
+   #  If there is a service description not linked from this list, it is ignored.
+   fuseki:services (
+     <#enliten-service>
+     <#refit-service>
+   ) .
+
+# Declaration additional assembler items.
+[] ja:loadClass "org.apache.jena.tdb.TDB" .
+
+# TDB
+tdb:DatasetTDB  rdfs:subClassOf  ja:RDFDataset .
+tdb:GraphTDB    rdfs:subClassOf  ja:Model .
+
+<#enliten-service>  rdf:type fuseki:Service ;
+    fuseki:name              "enliten" ;       # http://host:port/enliten
+    fuseki:serviceQuery      "query" ;    # SPARQL query service
+    fuseki:dataset           <#enliten> ;
+    .
+
+<#refit-service>  rdf:type fuseki:Service ;
+    fuseki:name              "refit" ;       # http://host:port/refit
+    fuseki:serviceQuery      "query" ;    # SPARQL query service
+    fuseki:dataset           <#refit> ;
+    .
+
+<#enliten> rdf:type      tdb:DatasetTDB ;
+    tdb:location "/home/mrt32/enliten-tdb" ;
+    # Query timeout on this dataset (1s, 1000 milliseconds)
+    ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "60000" ] ;
+    # Make the default graph be the union of all named graphs.
+    ## tdb:unionDefaultGraph true ;
+     .
+
+<#refit> rdf:type      tdb:DatasetTDB ;
+    tdb:location "/home/mrt32/refit-db" ;
+    # Query timeout on this dataset (1s, 1000 milliseconds)
+    ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "60000" ] ;
+    # Make the default graph be the union of all named graphs.
+    ## tdb:unionDefaultGraph true ;
+     

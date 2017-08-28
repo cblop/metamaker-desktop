@@ -1,0 +1,26 @@
+* MetaMaker plan
+** DONE add way to delete datasets
+   CLOSED: [2017-08-28 Mon 15:17]
+** TODO end process on exit
+** TODO add file-wide metadata
+** DONE fix adding datasets
+   CLOSED: [2017-08-28 Mon 13:20]
+** DONE fix multi-select
+   CLOSED: [2017-08-28 Mon 13:20]
+** TODO slugify dataset name
+** DONE auto refresh dataset list
+   CLOSED: [2017-08-28 Mon 10:12]
+** TODO query generation from ontology
+** TODO test query across multiple datasets
+** TODO proper SEAS ontology
+** TODO query returns CSV
+** TODO query in CSV header
+** TODO populate ontology from json / ttl
+** TODO change window title
+** TODO use local css and fonts
+- roboto fonts
+- bootstrap css & js
+** TODO documentation
+** TODO code comments
+** TODO test in Windows VM
+** TODO create executables

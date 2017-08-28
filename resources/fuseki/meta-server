@@ -1,0 +1,1 @@
+nohup ./fuseki-server --port 3030 --update --loc=./ds /ds &

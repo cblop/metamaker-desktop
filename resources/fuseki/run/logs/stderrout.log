@@ -1,0 +1,7 @@
+[2016-11-21 17:00:39] Server     INFO  Fuseki 2.4.1
+[2016-11-21 17:00:39] Config     INFO  FUSEKI_HOME=/home/mrt32/Downloads/apache-jena-fuseki-2.4.1
+[2016-11-21 17:00:39] Config     INFO  FUSEKI_BASE=/home/mrt32/Downloads/apache-jena-fuseki-2.4.1/run
+[2016-11-21 17:00:39] Servlet    INFO  Initializing Shiro environment
+[2016-11-21 17:00:39] Config     INFO  Shiro file: file:///home/mrt32/Downloads/apache-jena-fuseki-2.4.1/run/shiro.ini
+[2016-11-21 17:00:40] Config     INFO  Configuration file: /home/mrt32/Downloads/apache-jena-fuseki-2.4.1/run/config.ttl
+[2016-11-21 17:00:40] Server     INFO  Started 2016/11/21 17:00:40 GMT on port 3030
