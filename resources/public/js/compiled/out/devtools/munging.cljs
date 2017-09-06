@@ -13,13 +13,16 @@
 
   We can also cheat and look at runtime state of browser environment to determine some answers about namespaces.
 
+  This code can be used only in non-advanced builds!
+
   If you discovered breakage or a new case which should be covered by this code, please open an issue:
     https://github.com/binaryage/cljs-devtools/issues"
   (:refer-clojure :exclude [js-reserved?])
   (:require-macros [devtools.munging :refer [get-fast-path-protocol-partitions-count
-                                             get-fast-path-protocols-lookup-table]])
+                                             get-fast-path-protocols-lookup-table]]
+                   [devtools.oops :refer [oget ocall safe-call]])
   (:require [clojure.string :as string]
-            [devtools.util :refer-macros [oget oset ocall safe-call]]
+            [devtools.context :as context]
             [goog.object :as gobj])
   (:import [goog.string StringBuffer]))
 
@@ -30,13 +33,19 @@
 
 ; -- helpers ----------------------------------------------------------------------------------------------------------------
 
+(defn ^:dynamic get-global-scope []
+  (context/get-root))
+
 (defn js-reserved? [x]
-  ; js-reserved? is private for some reason
-  (ocall (oget js/window "cljs" "core") "js_reserved_QMARK_" x))
+  ; js-reserved? is private as of ClojureScript 1.9.293
+  (if-let [js-reserved-fn (oget (get-global-scope) "cljs" "core" "js_reserved_QMARK_")]
+    (js-reserved-fn x)))
 
 (defn get-fn-source-safely [f]
   (try
-    (ocall f "toString")
+    (if (js-in "toString" f)
+      (ocall f "toString")
+      "")
     (catch :default _
       "")))
 
@@ -186,7 +195,7 @@
 
 (defn ns-exists? [ns-module-name]
   {:pre [(string? ns-module-name)]}
-  (if-let [goog-namespaces (oget js/window "goog" "dependencies_" "nameToPath")]
+  (if-let [goog-namespaces (oget (get-global-scope) "goog" "dependencies_" "nameToPath")]
     (some? (oget goog-namespaces ns-module-name))))
 
 (defn detect-namespace-prefix
@@ -211,7 +220,7 @@
     (let [arity (first arity-tokens)]
       (case arity
         "variadic" arity
-        (ocall js/window "parseInt" arity 10)))))
+        (js/parseInt arity 10)))))
 
 (defn strip-arity [tokens]
   (let [[prefix-tokens arity-tokens] (split-with #(not= % "arity") tokens)]
@@ -499,7 +508,7 @@
 (defn parse-constructor-info
   "Given a Javascript constructor function tries to retrieve [ns name basis]. Returns nil if not a cljs type."
   [f]
-  (if (and (goog/isObject f) (oget f "cljs$lang$type"))
+  (if (and (goog/isObject f) (.-cljs$lang$type f))
     (let [type-name (get-type-name f)
           parts (.split type-name #"/")
           basis (safe-call get-basis [] f)]
@@ -514,7 +523,7 @@
   (string/split protocol-selector #"\."))
 
 (defn get-protocol-object [protocol-selector]
-  (loop [obj js/window
+  (loop [obj (get-global-scope)
          path (protocol-path protocol-selector)]
     (if (empty? path)
       obj
@@ -539,7 +548,7 @@
         name (last parts)]
     [ns name protocol-selector]))
 
-(def fast-path-protocols-lookup-table (get-fast-path-protocols-lookup-table))
+(def fast-path-protocols-lookup-table (delay (get-fast-path-protocols-lookup-table)))
 
 (defn key-for-protocol-partition [partition]
   (str "cljs$lang$protocol_mask$partition" partition "$"))
@@ -549,7 +558,7 @@
   (let [partition-key (key-for-protocol-partition partition)
         partition-bits (or (oget obj partition-key) 0)]
     (if (> partition-bits 0)
-      (let [lookup-table (get fast-path-protocols-lookup-table partition)
+      (let [lookup-table (get @fast-path-protocols-lookup-table partition)
             _ (assert (map? lookup-table)
                       (str "fast-path-protocols-lookup-table does not contain lookup table for partition " partition))
             * (fn [accum [bit protocol]]
@@ -592,7 +601,7 @@
         methods (group-by second matches)
         match-to-arity (fn [match]
                          (let [arity (nth match 2)]
-                           (ocall js/window "parseInt" arity 10)))
+                           (js/parseInt arity 10)))
         match-arity-comparator (fn [a b]
                                  (compare (match-to-arity a) (match-to-arity b)))
         post-process (fn [[munged-name matches]]

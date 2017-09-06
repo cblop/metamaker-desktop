@@ -2,6 +2,7 @@
 goog.provide('devtools.hints');
 goog.require('cljs.core');
 goog.require('devtools.prefs');
+goog.require('devtools.context');
 goog.require('cljs.stacktrace');
 devtools.hints.available_QMARK_ = (function devtools$hints$available_QMARK_(){
 return true;
@@ -42,9 +43,9 @@ xhr.send();
 return devtools.hints.empty_as_nil.call(null,xhr.responseText);
 });
 devtools.hints.retrieve_javascript_source = (function devtools$hints$retrieve_javascript_source(where){
-var reader = (function (){var or__6417__auto__ = devtools.prefs.pref.call(null,new cljs.core.Keyword(null,"file-reader","file-reader",-450847664));
-if(cljs.core.truth_(or__6417__auto__)){
-return or__6417__auto__;
+var reader = (function (){var or__25096__auto__ = devtools.prefs.pref.call(null,new cljs.core.Keyword(null,"file-reader","file-reader",-450847664));
+if(cljs.core.truth_(or__25096__auto__)){
+return or__25096__auto__;
 } else {
 return devtools.hints.ajax_reader;
 }
@@ -75,9 +76,9 @@ var content = devtools.hints.retrieve_javascript_source.call(null,file);
 var lines = content.split("\n");
 var line = devtools.hints.get_line.call(null,lines,line_number);
 var marked_line = devtools.hints.mark_call_closed_at_column.call(null,line,column);
-var min_length = (function (){var or__6417__auto__ = devtools.prefs.pref.call(null,new cljs.core.Keyword(null,"sanity-hint-min-length","sanity-hint-min-length",104958154));
-if(cljs.core.truth_(or__6417__auto__)){
-return or__6417__auto__;
+var min_length = (function (){var or__25096__auto__ = devtools.prefs.pref.call(null,new cljs.core.Keyword(null,"sanity-hint-min-length","sanity-hint-min-length",104958154));
+if(cljs.core.truth_(or__25096__auto__)){
+return or__25096__auto__;
 } else {
 return (128);
 }
@@ -92,31 +93,34 @@ return null;
 
 }
 });
+devtools.hints.parse_stacktrace = (function devtools$hints$parse_stacktrace(native_stack_trace){
+return cljs.stacktrace.parse_stacktrace.call(null,cljs.core.PersistentArrayMap.EMPTY,native_stack_trace,new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"ua-product","ua-product",938384227),new cljs.core.Keyword(null,"chrome","chrome",1718738387)], null),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"asset-root","asset-root",1771735072),""], null));
+});
 devtools.hints.error_object_sense = (function devtools$hints$error_object_sense(error){
 try{var native_stack_trace = error.stack;
-var stack_trace = cljs.stacktrace.parse_stacktrace.call(null,cljs.core.PersistentArrayMap.EMPTY,native_stack_trace,new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"ua-product","ua-product",938384227),new cljs.core.Keyword(null,"chrome","chrome",1718738387)], null),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"asset-root","asset-root",1771735072),""], null));
+var stack_trace = devtools.hints.parse_stacktrace.call(null,native_stack_trace);
 var top_item = cljs.core.second.call(null,stack_trace);
-var map__15276 = top_item;
-var map__15276__$1 = ((((!((map__15276 == null)))?((((map__15276.cljs$lang$protocol_mask$partition0$ & (64))) || (map__15276.cljs$core$ISeq$))?true:false):false))?cljs.core.apply.call(null,cljs.core.hash_map,map__15276):map__15276);
-var file = cljs.core.get.call(null,map__15276__$1,new cljs.core.Keyword(null,"file","file",-1269645878));
-var line = cljs.core.get.call(null,map__15276__$1,new cljs.core.Keyword(null,"line","line",212345235));
-var column = cljs.core.get.call(null,map__15276__$1,new cljs.core.Keyword(null,"column","column",2078222095));
+var map__43259 = top_item;
+var map__43259__$1 = ((((!((map__43259 == null)))?((((map__43259.cljs$lang$protocol_mask$partition0$ & (64))) || (map__43259.cljs$core$ISeq$))?true:false):false))?cljs.core.apply.call(null,cljs.core.hash_map,map__43259):map__43259);
+var file = cljs.core.get.call(null,map__43259__$1,new cljs.core.Keyword(null,"file","file",-1269645878));
+var line = cljs.core.get.call(null,map__43259__$1,new cljs.core.Keyword(null,"line","line",212345235));
+var column = cljs.core.get.call(null,map__43259__$1,new cljs.core.Keyword(null,"column","column",2078222095));
 return devtools.hints.make_sense_of_the_error.call(null,error.message,file,line,column);
-}catch (e15275){var _e = e15275;
+}catch (e43258){var _e = e43258;
 return false;
 }});
 devtools.hints.type_error_to_string = (function devtools$hints$type_error_to_string(self){
-var temp__4655__auto___15278 = devtools.hints.get_processed_errors_BANG_.call(null);
-if(cljs.core.truth_(temp__4655__auto___15278)){
-var seen_errors_15279 = temp__4655__auto___15278;
-if(cljs.core.truth_(seen_errors_15279.has(self))){
+var temp__4655__auto___43261 = devtools.hints.get_processed_errors_BANG_.call(null);
+if(cljs.core.truth_(temp__4655__auto___43261)){
+var seen_errors_43262 = temp__4655__auto___43261;
+if(cljs.core.truth_(seen_errors_43262.has(self))){
 } else {
-seen_errors_15279.add(self);
+seen_errors_43262.add(self);
 
-var temp__4657__auto___15280 = devtools.hints.error_object_sense.call(null,self);
-if(cljs.core.truth_(temp__4657__auto___15280)){
-var sense_15281 = temp__4657__auto___15280;
-self.message = [cljs.core.str(self.message),cljs.core.str(", a sanity hint:\n"),cljs.core.str(sense_15281)].join('');
+var temp__4657__auto___43263 = devtools.hints.error_object_sense.call(null,self);
+if(cljs.core.truth_(temp__4657__auto___43263)){
+var sense_43264 = temp__4657__auto___43263;
+self.message = [cljs.core.str(self.message),cljs.core.str(", a sanity hint:\n"),cljs.core.str(sense_43264)].join('');
 } else {
 }
 }
@@ -142,9 +146,9 @@ return true;
 }
 });
 devtools.hints.install_type_error_enhancer = (function devtools$hints$install_type_error_enhancer(){
-devtools.hints._STAR_original_global_error_handler_STAR_ = window.onerror;
+devtools.hints._STAR_original_global_error_handler_STAR_ = devtools.context.get_root.call(null).onerror;
 
-window.onerror = devtools.hints.global_error_handler;
+devtools.context.get_root.call(null).onerror = devtools.hints.global_error_handler;
 
 var prototype = TypeError.prototype;
 devtools.hints._STAR_original_type_error_prototype_to_string_STAR_ = prototype.toString;
@@ -179,7 +183,7 @@ if(cljs.core.truth_(devtools.hints._STAR_original_type_error_prototype_to_string
 throw (new Error("Assert failed: *original-type-error-prototype-to-string*"));
 }
 
-window.onerror = devtools.hints._STAR_original_global_error_handler_STAR_;
+devtools.context.get_root.call(null).onerror = devtools.hints._STAR_original_global_error_handler_STAR_;
 
 var prototype = TypeError.prototype;
 return prototype.toString = devtools.hints._STAR_original_type_error_prototype_to_string_STAR_;
@@ -188,4 +192,4 @@ return null;
 }
 });
 
-//# sourceMappingURL=hints.js.map?rel=1502809980286
+//# sourceMappingURL=hints.js.map?rel=1504172216705

@@ -5,6 +5,64 @@
             [cljsjs.chartjs]
             [reagent.core :as reagent]))
 
+(defn in?
+  "true if coll contains elm"
+  [coll elm]
+  (some #(= elm %) coll))
+
+(def HOST "http://localhost:3030/ds/data/")
+
+(defn generate-query [columns]
+  (let [graphs (re-frame/subscribe [:graphs])]
+      (apply str
+             "PREFIX csv:<http://www.ntnu.no/ub/data/csv#>\n"
+             "PREFIX ssn:<http://purl.oclc.org/NET/ssnx/ssn#>\n"
+             "PREFIX xsd:<http://www.w3.org/2001/XMLSchema#>\n"
+             "SELECT *"
+             (apply str
+                    (for [g @graphs]
+                      (str "FROM <" HOST g ">\n")))
+             "WHERE {{\n"
+             (apply str
+                    (for [c columns]
+                      (apply str
+                             "SELECT ?")))
+             "}}")))
+
+(defn locals-modal []
+  (let [show? (re-frame/subscribe [:show-locals-modal])
+        datasets (re-frame/subscribe [:datasets])
+        sets (re-frame/subscribe [:selected-sets])
+        locals (filter #(and (in? @sets (:id %)) (re-find #"http://localhost" (:url %))) @datasets)]
+    (when @show? [re-com/modal-panel :child
+                  [re-com/v-box
+                   :gap "10px"
+                   :children [[re-com/label :label "Please select the local files for the following:"]
+                              (if locals
+                                [re-com/v-box
+                                 :children [(for [l locals]
+                                              [re-com/h-box
+                                               :justify :center
+                                               :gap "10px"
+                                               :children [[re-com/label :label (:label l)]
+                                                          [:input {:type "file" :id (:label l) :name (:label l) :on-change #()}]]])]])
+                              [re-com/h-box
+                               :justify :center
+                               :gap "10px"
+                               :children [[re-com/button
+                                           :label "OK"
+                                           :class "btn-primary"
+                                           :on-click #(do (re-frame/dispatch [:send-sparql])
+                                                          ;; (re-frame/dispatch [:toggle-locals-modal])
+                                                          )
+                                           ]
+                                          [re-com/button
+                                           :label "Cancel"
+                                           :class "btn-default"
+                                           :on-click #(re-frame/dispatch [:toggle-locals-modal])]]
+
+                               ]
+                              ]]])))
 
 (defn title []
   (fn []
@@ -62,13 +120,22 @@
                  :on-change #(re-frame/dispatch [:update-sparql %])]]]))
 
 (defn send-query []
-  [re-com/h-box
-   :justify :center
-   :children [
-              [re-com/button
-               :label "Send Query"
-               :class "btn-success"
-               :on-click #(re-frame/dispatch [:send-sparql])]]])
+  (let [
+        show? (re-frame/subscribe [:show-locals-modal])
+        datasets (re-frame/subscribe [:datasets])
+        sets (re-frame/subscribe [:selected-sets])
+        locals (filter #(and (in? @sets (:id %)) (re-find #"http://localhost" (:url %))) @datasets)]
+    [re-com/h-box
+     :justify :center
+     :children [
+                [re-com/button
+                 :label "Send Query"
+                 :class "btn-success"
+                 :on-click #(if (seq @sets) (if (seq locals) (re-frame/dispatch [:toggle-locals-modal]) (re-frame/dispatch [:send-sparql])) (re-frame/dispatch [:error-modal "Please select one or more dataset(s) to query"])
+                                )
+                 ;; :on-click #(js/alert "Heey")
+                 ]]]))
+
 
 (defn cat-a-drop [i]
   (let [selected-cat-a (re-frame/subscribe [:selected-cat-qa i])

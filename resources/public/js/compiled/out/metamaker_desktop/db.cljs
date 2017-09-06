@@ -13,6 +13,7 @@
                  :datasets [{:data []
                              :label "Values"}]}}
    :selected-sets (set [])
+   :show-locals-modal false
    :srate "1"
    :data-urls []
    :datasets []
@@ -68,6 +69,7 @@ WHERE {{
    :files []
    :current-tab :tab1
    :description ""
+   :show-sparql false
    :selected-tab 0
    :datatypes [{:cat-b "Start time"
                 :cat-a "Time"

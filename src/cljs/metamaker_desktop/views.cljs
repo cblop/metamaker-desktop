@@ -1,12 +1,30 @@
 (ns metamaker-desktop.views
   (:require [re-frame.core :as re-frame]
             [re-com.core :refer [input-text input-textarea title v-box h-box gap label button single-dropdown horizontal-tabs vertical-pill-tabs md-circle-icon-button]]
-            [metamaker-desktop.query :refer [dataset-drop sparql-text send-query cat-a-drop cat-b-drop text-filter cat-select add-triple get-readings chart-inner localfile-b sample-rate]]
-            [reagent.core :as reagent]))
+            [metamaker-desktop.query :refer [dataset-drop sparql-text send-query cat-a-drop cat-b-drop text-filter cat-select add-triple get-readings chart-inner localfile-b sample-rate locals-modal]]
+            [reagent.core :as reagent]
+            [re-com.core :as re-com]))
 
 (def tab-list [{:id :tab1 :label "Create Metadata"}
                {:id :tab2 :label "Query Data"}
                ])
+
+
+(defn error-modal []
+  (let [msg (re-frame/subscribe [:error-msg])]
+    (when @msg
+      [re-com/modal-panel :child
+       [re-com/v-box
+        :gap "10px"
+        :children [[re-com/label :label @msg]
+                   [re-com/h-box
+                    :justify :center
+                    :gap "10px"
+                    :children [[re-com/button
+                                :label "Close"
+                                :class "btn-default"
+                                :on-click #(re-frame/dispatch [:dismiss-error])]]]]]])))
+
 
 (defn filename []
   (let [fname (re-frame/subscribe [:fname])]
@@ -306,8 +324,10 @@
      ])
   )
 
+
 (defn query-tab []
-  (let [data (re-frame/subscribe [:chart-data])]
+  (let [data (re-frame/subscribe [:chart-data])
+        show-sparql (re-frame/subscribe [:show-sparql])]
     [v-box
      :height "100%"
      :gap "30px"
@@ -316,9 +336,19 @@
                 [cat-select]
                 [add-triple]
                 ;; [get-readings]
-                [sparql-text]
+                (if @show-sparql
+                  [sparql-text])
+                [h-box
+                 :justify :center
+                 :children [
+                            [button
+                             :label (if @show-sparql "Hide SPARQL" "Show SPARQL")
+                             :on-click #(re-frame/dispatch [:toggle-sparql])
+                             :class "btn-default"]]]
+                [sample-rate]
                 [send-query]
-                ;; [sample-rate]
+                [locals-modal]
+                [error-modal]
                 ;; [:div {:style {:margin "auto"}} [localfile-b]]
                 ;; [:div {:style {:width "900px" :height "200px" :margin "auto"}} [chart-inner (:data @data)]]
                 ]])

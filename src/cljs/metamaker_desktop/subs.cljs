@@ -3,9 +3,24 @@
     (:require [re-frame.core :as re-frame]))
 
 (re-frame/reg-sub
+ :graphs
+ (fn [db]
+   (map #(:label (nth (:datasets db) %)) (:selected-sets db))))
+
+(re-frame/reg-sub
  :name
  (fn [db]
    (:name db)))
+
+(re-frame/reg-sub
+ :error-msg
+ (fn [db]
+   (:error-msg db)))
+
+(re-frame/reg-sub
+ :show-sparql
+ (fn [db]
+   (:show-sparql db)))
 
 (re-frame/reg-sub
  :dname
@@ -194,35 +209,98 @@
  (fn [db]
    (:y db)))
 
+
+;; (defn make-query [dsets columns]
+;;   (str
+;;    "PREFIX csv:<http://www.ntnu.no/ub/data/csv#>\n"
+;;    "PREFIX ssn:<http://purl.oclc.org/NET/ssnx/ssn#>\n"
+;;    "PREFIX xsd:<http://www.w3.org/2001/XMLSchema#>\n"
+;;    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+;;    "PREFIX seas: <https://w3id.org/seas#>\n"
+;;    "PREFIX dm4t: <http://www.cs.bath.ac.uk/dm4t#>\n"
+;;    "PREFIX dcterms: <http://purl.org/dc/terms/>\n"
+;;    "PREFIX : <http://www.cs.bath.ac.uk/dm4t#>\n"
+;;    "SELECT ?d ?f"
+;;    (apply str (for [i (range (count columns))] (str " ?c" i))) "\n"
+;;    (apply str (for [d dsets]
+;;                 (str "FROM <http://localhost:3030/ds/data/" d ">\n")))
+;;    "WHERE {"
+;;    (apply str (map-indexed (fn [i c]
+;;                              (str "?f csv:hasColumn ?t" i " .\n"
+;;                                   "?t" i " csv:mapsTo " c " .\n"
+;;                                   "?t" i " csv:hasIndex ?c" i " .\n")) columns))
+;;    "?f rdfs:label ?d .}"
+;;    ))
+
+(defn make-query [dsets columns]
+  (str
+   "PREFIX csv:<http://www.ntnu.no/ub/data/csv#>\n"
+   "PREFIX ssn:<http://purl.oclc.org/NET/ssnx/ssn#>\n"
+   "PREFIX xsd:<http://www.w3.org/2001/XMLSchema#>\n"
+   "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+   "PREFIX seas: <https://w3id.org/seas#>\n"
+   "PREFIX dm4t: <http://www.cs.bath.ac.uk/dm4t#>\n"
+   "PREFIX dcterms: <http://purl.org/dc/terms/>\n"
+   "PREFIX : <http://www.cs.bath.ac.uk/dm4t#>\n"
+   "SELECT *\n"
+   (apply str (for [d dsets]
+                (str "FROM <http://localhost:3030/ds/data/" d ">\n")))
+   "WHERE {{"
+   "SELECT ?d ?f ?c0\n"
+   "WHERE {"
+   "?f csv:hasColumn ?t0 .\n"
+   "?t0 csv:mapsTo " (first columns) " .\n"
+   "?t0 csv:hasIndex ?c0 .\n"
+   "?f rdfs:label ?d .}} "
+   (apply str
+          (for [i (range 1 (count columns))]
+            (str "UNION {\n"
+                 "SELECT ?f ?d" (str " ?c" i) " "
+             "WHERE {\n"
+             (str "?f csv:hasColumn ?t" i " .\n"
+                  "?t" i " csv:mapsTo " (nth columns i) " .\n"
+                  "?t" i " csv:hasIndex ?c" i " .\n")
+             "?f rdfs:label ?d .}}")))
+   "}"
+   ))
+
+
 (re-frame/reg-sub
  :sparql
  (fn [db]
-   (:sparql db)
    (let [cat-as (:cat-qa db)
          cat-bs (:cat-qb db)
          filtered (:filtered-cats db)
+         all-cats (map #(:p (nth (:cat-bs db) %)) cat-bs)
          ]
-     (if-not (and (nil? (second cat-bs)) (nil? (first cat-bs)))
-       (str "PREFIX csv:<http://www.ntnu.no/ub/data/csv#>\n"
-            "PREFIX ssn:<http://purl.oclc.org/NET/ssnx/ssn#>\n"
-            "PREFIX seas:<https://w3id.org/seas#>\n"
-            "PREFIX xsd:<http://www.w3.org/2001/XMLSchema#>\n"
-            "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>\n"
-            "SELECT *\n"
-            "WHERE {{"
-            "SELECT ?f ?x WHERE {\n"
-            "                    ?f rdfs:label \"" (:dataset db) "\" .\n"
-            "                    ?f csv:hasColumn ?c .\n"
-            "                    ?c csv:mapsTo " (:p (nth (:cat-bs db) (first cat-bs))) " .\n"
-            "                    ?c csv:hasIndex ?x .}\n"
-            "} UNION {\n"
-            "  SELECT ?y WHERE {\n"
-            "                    ?f rdfs:label \"" (:dataset db) "\" .\n"
-            "                   ?f csv:hasColumn ?cy .\n"
-            "                   ?cy csv:mapsTo " (:p (nth (:cat-bs db) (second cat-bs))) " .\n"
-            "                   ?cy csv:hasIndex ?y .}}}\n"
-            )
-       "")
+     ;; (println "DATASETS:")
+     ;; (js/alert "hey")
+     ;; (println (map :label (:datasets db)))
+     ;; (println all-cats)
+     ;; (println (:sparql db))
+     ;; (println (make-query (map :label (:datasets db)) all-cats))
+     (make-query (map :label (:datasets db)) all-cats)
+     ;; (if-not (and (nil? (second cat-bs)) (nil? (first cat-bs)))
+     ;;   (str "PREFIX csv:<http://www.ntnu.no/ub/data/csv#>\n"
+     ;;        "PREFIX ssn:<http://purl.oclc.org/NET/ssnx/ssn#>\n"
+     ;;        "PREFIX seas:<https://w3id.org/seas#>\n"
+     ;;        "PREFIX xsd:<http://www.w3.org/2001/XMLSchema#>\n"
+     ;;        "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>\n"
+     ;;        "SELECT *\n"
+     ;;        "WHERE {{"
+     ;;        "SELECT ?f ?x WHERE {\n"
+     ;;        "                    ?f rdfs:label \"" (:dataset db) "\" .\n"
+     ;;        "                    ?f csv:hasColumn ?c .\n"
+     ;;        "                    ?c csv:mapsTo " (:p (nth (:cat-bs db) (first cat-bs))) " .\n"
+     ;;        "                    ?c csv:hasIndex ?x .}\n"
+     ;;        "} UNION {\n"
+     ;;        "  SELECT ?y WHERE {\n"
+     ;;        "                    ?f rdfs:label \"" (:dataset db) "\" .\n"
+     ;;        "                   ?f csv:hasColumn ?cy .\n"
+     ;;        "                   ?cy csv:mapsTo " (:p (nth (:cat-bs db) (second cat-bs))) " .\n"
+     ;;        "                   ?cy csv:hasIndex ?y .}}}\n"
+     ;;        )
+     ;;   "")
      )
    ))
 
@@ -240,6 +318,11 @@
  :cat-as
  (fn [db]
    (:cat-as db)))
+
+(re-frame/reg-sub
+ :show-locals-modal
+ (fn [db]
+   (:show-locals-modal db)))
 
 (re-frame/reg-sub
  :chart-data

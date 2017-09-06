@@ -1,6 +1,11 @@
 (ns devtools.hints
+  (:require-macros [devtools.compiler :refer [check-compiler-options!]])
   (:require [devtools.prefs :refer [pref]]
+            [devtools.context :as context]
             [cljs.stacktrace :as stacktrace]))
+
+; cljs.stacktrace does not play well in :advanced mode optimizations, see https://github.com/binaryage/cljs-devtools/issues/37
+(check-compiler-options!)
 
 (defn ^:dynamic available? []
   true)
@@ -91,10 +96,13 @@
     (re-matches #"Cannot read property 'call' of.*" message) (mark-null-call-site-location file line-number column)
     :else nil))
 
+(defn parse-stacktrace [native-stack-trace]
+  (stacktrace/parse-stacktrace {} native-stack-trace {:ua-product :chrome} {:asset-root ""}))
+
 (defn error-object-sense [error]
   (try
     (let [native-stack-trace (.-stack error)
-          stack-trace (stacktrace/parse-stacktrace {} native-stack-trace {:ua-product :chrome} {:asset-root ""})
+          stack-trace (parse-stacktrace native-stack-trace)
           top-item (second stack-trace)                                                                                       ; first line is just an error message
           {:keys [file line column]} top-item]
       (make-sense-of-the-error (.-message error) file line column))
@@ -120,8 +128,8 @@
       true)))
 
 (defn install-type-error-enhancer []
-  (set! *original-global-error-handler* (.-onerror js/window))
-  (set! (.-onerror js/window) global-error-handler)
+  (set! *original-global-error-handler* (.-onerror (context/get-root)))
+  (set! (.-onerror (context/get-root)) global-error-handler)
   (let [prototype (.-prototype js/TypeError)]
     (set! *original-type-error-prototype-to-string* (.-toString prototype))
     (set! (.-toString prototype) #(this-as self (type-error-to-string self)))))                                               ; work around http://dev.clojure.org/jira/browse/CLJS-1545
@@ -141,6 +149,6 @@
   (when *installed*
     (set! *installed* false)
     (assert *original-type-error-prototype-to-string*)
-    (set! (.-onerror js/window) *original-global-error-handler*)
+    (set! (.-onerror (context/get-root)) *original-global-error-handler*)
     (let [prototype (.-prototype js/TypeError)]
       (set! (.-toString prototype) *original-type-error-prototype-to-string*))))

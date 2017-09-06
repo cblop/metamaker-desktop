@@ -1,15 +1,38 @@
 (ns metamaker-desktop.repl
-  (:require 
+  (:require
             [re-frame.core :as re-frame]))
 
 (def db (re-frame/subscribe [:db]))
 (def data (re-frame/subscribe [:chart-data]))
 
 (:chart-data @db)
+(:cat-qa @db)
+
+(map #(:p (nth (:cat-bs @db) %)) (:cat-qb @db))
+(:selected-sets @db)
+(:all-cats @db)
+
+
+(defn in?
+  "true if coll contains elm"
+  [coll elm]
+  (some #(= elm %) coll))
+
+(in? (:selected-sets @db) "0")
 
 @data
 
 @db
+(def urls (re-frame/subscribe [:data-urls]))
+@urls
+(:datasets @db)
+(:response @db)
+
+(re-find #"http://localhost" "http://mist.com")
+(re-find #"http://localhost" "http://localhost:3030/test.csv")
+
+(keys @db)
+(:data-urls @db)
 
 (:name @db)
 (:description @db)

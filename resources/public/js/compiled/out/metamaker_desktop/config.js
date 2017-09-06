@@ -3,4 +3,4 @@ goog.provide('metamaker_desktop.config');
 goog.require('cljs.core');
 metamaker_desktop.config.debug_QMARK_ = goog.DEBUG;
 
-//# sourceMappingURL=config.js.map?rel=1502809970798
+//# sourceMappingURL=config.js.map?rel=1504172210399

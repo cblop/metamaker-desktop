@@ -1,7 +1,8 @@
 (ns devtools.formatters
   (:require [goog.labs.userAgent.browser :as ua]
             [devtools.prefs :as prefs]
-            [devtools.util :refer [get-formatters-safe set-formatters-safe!]]
+            [devtools.util :refer [get-formatters-safe set-formatters-safe! in-node-context?]]
+            [devtools.context :as context]
             [devtools.formatters.core :refer [header-api-call has-body-api-call body-api-call]]))
 
 (def ^:dynamic *installed* false)
@@ -11,14 +12,15 @@
 (def obsolete-formatter-key "devtoolsFormatter")
 
 (defn ^:dynamic available? []
-  (and (ua/isChrome) (ua/isVersionOrHigher 47)))                                                                              ; Chrome 47+
+  (or (in-node-context?)                                                                                                      ; node.js or Chrome 47+
+      (and (ua/isChrome) (ua/isVersionOrHigher 47))))
 
 (deftype CLJSDevtoolsFormatter [])
 
 ; devtools.debug namespace may not be present => no debugging
 (defn- find-fn-in-debug-ns [fn-name]
   (try
-    (aget js/window "devtools" "debug" fn-name)
+    (aget (context/get-root) "devtools" "debug" fn-name)
     (catch :default _
       nil)))
 
@@ -75,7 +77,7 @@
     (.push formatters formatter)                                                                                              ; acting on duplicated array
     (set-formatters-safe! formatters)
     (if (prefs/pref :legacy-formatter)
-      (aset js/window obsolete-formatter-key formatter))))
+      (aset (context/get-root) obsolete-formatter-key formatter))))
 
 (defn- uninstall-our-formatters! []
   (let [new-formatters (remove is-ours? (vec (get-formatters-safe)))

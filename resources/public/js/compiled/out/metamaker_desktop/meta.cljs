@@ -39,6 +39,8 @@
             (str "<" (:url hmap) "> a csv:CsvDocument ;\n")
             (str "  rdfs:label \"" (:name hmap) "\" ;\n")
             (str "  rdfs:comment \"" (:description hmap) "\" ;\n")
+            ;; (apply str
+            ;;        (map #(str "  " (:p %)) (:file-metas hmap)))
             (apply str
                    (for [i (range (count (:columns hmap)))]
                      (str "  csv:hasColumn :column" i (if (= i (- (count (:columns hmap)) 1)) " .\n\n" " ;\n"))))

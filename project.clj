@@ -58,12 +58,16 @@
   {:dev
    {:dependencies [[binaryage/devtools "0.8.2"]
                    [figwheel-sidecar "0.5.7"]
+                   [binaryage/devtools "0.9.4"]
                    [com.andrewmcveigh/cljs-time "0.4.0"]
                    [com.cemerick/piggieback "0.2.1"]
                    [javax.servlet/servlet-api "2.5"]
                    [ring/ring-mock "0.3.0"]
+                   [day8/re-frame-tracer "0.1.1-SNAPSHOT"]
+                   [org.clojars.stumitchell/clairvoyant "0.2.1"]
                    ]
 
+    :preloads [devtools.preload]
     :main metamaker-desktop.core
     :plugins      [[lein-figwheel "0.5.7"]]
     }

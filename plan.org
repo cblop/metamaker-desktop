@@ -2,12 +2,16 @@
 ** DONE add way to delete datasets
    CLOSED: [2017-08-28 Mon 15:17]
 ** TODO end process on exit
+** TODO convert SPARQL to UNION
 ** TODO add file-wide metadata
+** TODO test on REFIT data
 ** DONE fix adding datasets
    CLOSED: [2017-08-28 Mon 13:20]
 ** DONE fix multi-select
    CLOSED: [2017-08-28 Mon 13:20]
 ** TODO slugify dataset name
+** TODO prompt for files when querying local datasets
+(need to do in modal prompt)
 ** DONE auto refresh dataset list
    CLOSED: [2017-08-28 Mon 10:12]
 ** TODO query generation from ontology
@@ -24,3 +28,37 @@
 ** TODO code comments
 ** TODO test in Windows VM
 ** TODO create executables
+
+* Notes
+** Local file handling
+** CSV output format
+User selects a bunch of triples. What they want back out is file & column information for each triple.
+
+Or a CSV file, where the column headers are fileURI->ontURI. Example:
+
+http://dm4t.com/test.csv->xsd:dateTimeStamp  http://dm4t/test.csv->seas:device
+(values)                                     (values)
+
+The question is then: how to deal with multiple files? Probably need multiple CSV files output, right?
+
+No, better redesign the CSV output. Like so:
+
+dataset            file                          xsd:dateTimeStamp(1)          seas:device(4)
+enliten\t          http://dm4t.com/test.csv\t    234235y23\t                   http://dm4t.com/device/1\n
+
+Empty columns should just be a blank string (\t\t)
+
+The actual SPARQL query for this is just an internal representation. Could be:
+?d: dataset
+?f: file
+?c1: column 1
+?c2: column 2
+
+...etc. Practice writing the actual queries first.
+
+You need to get the original column names back out, though.
+
+** Handling REFIT
+You have a situation where a column refers to an ID in a separate file. What do you do?
+
+Should be OK in theory, as long as the graph has been built up. This is an excellent test case, though.

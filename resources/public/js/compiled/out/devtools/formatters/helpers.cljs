@@ -1,5 +1,5 @@
 (ns devtools.formatters.helpers
-  (:require-macros [devtools.util :refer [oget oset ocall oapply safe-call]])
+  (:require-macros [devtools.oops :refer [oget safe-call]])
   (:require [devtools.prefs :as prefs]
             [devtools.munging :as munging]
             [devtools.format :refer [IDevtoolsFormat]]
@@ -10,13 +10,16 @@
     (recur (prefs/pref v))
     v))
 
+(defn get-prototype [o]
+  (.-prototype o))
+
 (defn get-constructor [o]
-  (oget o "constructor"))
+  (.-constructor o))
 
 ; ---------------------------------------------------------------------------------------------------------------------------
 
 (defn is-prototype? [o]
-  (identical? (.-prototype (.-constructor o)) o))
+  (identical? (get-prototype (get-constructor o)) o))
 
 (defn is-js-symbol? [o]
   (= (goog/typeOf o) "symbol"))
@@ -39,7 +42,7 @@
 (defn cljs-type? [f]
   (and (goog/isObject f)                                                                                                      ; see http://stackoverflow.com/a/22482737/84283
        (not (is-prototype? f))
-       (oget f "cljs$lang$type")))
+       (.-cljs$lang$type f)))
 
 (defn cljs-instance? [value]
   (and (goog/isObject value)                                                                                                  ; see http://stackoverflow.com/a/22482737/84283
@@ -100,7 +103,7 @@
   (map (partial fetch-field-value obj) fields))
 
 (defn expandable? [obj]
-  (if (seqable? obj)
+  (if (satisfies? ISeqable obj)
     (if-let [min-count (pref (if (instance-of-a-well-known-type? obj)
                                :min-expandable-sequable-count-for-well-known-types
                                :min-expandable-sequable-count))]

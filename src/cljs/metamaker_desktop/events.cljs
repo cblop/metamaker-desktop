@@ -4,6 +4,7 @@
               [metamaker-desktop.parser :as parser]
               [re-com.dropdown :refer [filter-choices-by-keyword]]
               [metamaker-desktop.meta :refer [make-triples]]
+              [metamaker-desktop.subs :refer [make-query]]
               [metamaker-desktop.types :refer [detect-type]]
               [metamaker-desktop.db :as db]))
 
@@ -11,13 +12,14 @@
 (def HOST "http://localhost:7777")
 
 
-(def query-template "PREFIX csv:<http://www.ntnu.no/ub/data/csv#>
-  PREFIX ssn:<http://purl.oclc.org/NET/ssnx/ssn#>
+;; (def query-template "PREFIX csv:<http://www.ntnu.no/ub/data/csv#>
+;;   PREFIX ssn:<http://purl.oclc.org/NET/ssnx/ssn#>
 
-  SELECT ?f ?i 
-  WHERE {?f csv:hasColumn ?c .
-                ?c csv:mapsTo ssn:hasValue .
-                ?c csv:hasIndex ?i .}")
+;;   SELECT ?f ?i 
+;;   WHERE {?f csv:hasColumn ?c .
+;;                 ?c csv:mapsTo ssn:hasValue .
+;;                 ?c csv:hasIndex ?i .}")
+
 
 (re-frame/reg-event-db
  :initialize-db
@@ -51,16 +53,28 @@
  (fn [db [_ fname]]
    (let [url (first (array-seq (.-files (.getElementById js/document "file"))))]
      (do
+       ;; (js/alert (.-path url))
+       ;; (js/alert (.-value (.getElementById js/document "file")))
        (parser/parse-sample url 10)
        (assoc db :url (str "http://localhost:3030/ds/" (.-name url)))))))
 
 (re-frame/reg-event-db
- :stream-local
+ :upload-local
  (fn [db [_ fname]]
    (let [url (first (array-seq (.-files (.getElementById js/document "file"))))]
      (do
-       (parser/parse-local url)
-       ))))
+       ;; (js/alert (.-path url))
+       ;; (js/alert (.-value (.getElementById js/document "file")))
+       (parser/parse-sample url 10)
+       (assoc db :url (str "http://localhost:3030/ds/" (.-name url)))))))
+
+;; (re-frame/reg-event-db
+;;  :stream-local
+;;  (fn [db [_ fname]]
+;;    (let [url (first (array-seq (.-files (.getElementById js/document "file"))))]
+;;      (do
+;;        (parser/parse-local url)
+;;        ))))
 
 (re-frame/reg-event-db
  :add-dataset
@@ -68,6 +82,10 @@
    (assoc db :selected-sets dset)
    ))
 
+(re-frame/reg-event-db
+ :toggle-sparql
+ (fn [db _]
+   (assoc db :show-sparql (not (:show-sparql db)))))
 
 (re-frame/reg-event-db
  :fetch
@@ -301,12 +319,20 @@
    db))
 
 (re-frame/reg-event-db
+ :download-csv
+ (fn [db [_ data]]
+   (download "out.csv" (apply str (interpose "\n" data)))
+   db
+   ))
+
+(re-frame/reg-event-db
  :create-metadata
  (fn [db _]
    (let [metas (map :metadata (:metas db))
          hmap {:name (:dataset-name db)
                :description (:description db)
                :url (:url db)
+               :file-metas {:file-metas db}
                :columns (:metas db)
                }]
      (println (make-triples hmap))
@@ -366,12 +392,23 @@
    (println new)
    (assoc-in db [:cat-qb i] new)))
 
+
 (re-frame/reg-event-db
  :delete-q-row
  (fn [db [_ row-id]]
    (println (:cat-qa db))
    (assoc db :cat-qa (vec (drop-nth (:cat-qa db) row-id)))))
 
+(defn existing-index [col e]
+  (first (remove nil? (map-indexed (fn [i x] (if (and (= (:value (:f x)) (:value (:f e))) (= (:value (:d x)) (:value (:d e)))) i nil)) col))))
+
+(defn merge-bindings [bindings]
+  (loop [bs bindings acc []]
+    (if (empty? bs) acc
+        (let [match (existing-index acc (first bs))
+              p (println match)
+              ]
+          (recur (rest bs) (if match (assoc acc match (merge (nth acc match) (first bs))) (conj acc (first bs))))))))
 
 (re-frame/reg-event-db
  :query-response-handler
@@ -379,24 +416,44 @@
    (let [json (get response "out")
          p (println response)
          j (js->clj (.parse js/JSON json) :keywordize-keys true)
-         f (get-in j [:results :bindings 0 :f :value])
-         x (get-in j [:results :bindings 0 :x :value])
-         y (get-in j [:results :bindings 1 :y :value])
-         local (if (.getElementById js/document "file") (first (array-seq (.-files (.getElementById js/document "file")))) nil)
+         ;; results (map keys (get-in j [:results :bindings]))
+         results (merge-bindings (get-in j [:results :bindings]))
+         p (println results)
+         fs (map #(:value (:f %)) results)
+         ds (map #(:value (:d %)) results)
+         cols (map #(-> %
+                        (dissoc :f)
+                        (dissoc :d)) results)
+         col-map (map (fn [xs] (apply merge (for [y (keys xs)]
+                                              (hash-map y (:value (get xs y)))))) cols)
+         all-cats (:all-cats db)
+         lcats (apply merge (map-indexed #(hash-map (keyword (str "c" %1)) %2) all-cats))
+         ;; all-cats (apply merge cols)
+         ;; x (get-in j [:results :bindings 0 :x :value])
+         ;; y (get-in j [:results :bindings 1 :y :value])
+         locals (if (seq ds) (for [d ds] (first (array-seq (.-files (.getElementById js/document d))))) nil)
+         ldata (map vector locals fs ds col-map (repeat lcats))
+         ;; local (if (.getElementById js/document "file") (first (array-seq (.-files (.getElementById js/document "file")))) nil)
          ]
      ;; (println response)
-     (println f)
-     (if local (println "local" "remote"))
-     (if local
-       (parser/parse-local local)
-       (parser/parse-stream f))
-     (assoc (assoc (assoc db :response response) :x x) :y y))))
+     ;; (println f)
+     ;; (if local (println "local" "remote"))
+     ;; (if local
+     ;;   (parser/parse-local local)
+     ;;   (parser/parse-stream f))
+     ;; (assoc (assoc (assoc db :response response) :x x) :y y)
+     (println lcats)
+     (println locals)
+     (doseq [l ldata]
+       (apply parser/parse-local l))
+     db
+     )))
 
 
 (re-frame/reg-event-db
  :query-response-handler-b
  (fn [db [_ response]]
-   (println response)
+   ;; (println response)
    (assoc db :response response)))
 
 (re-frame/reg-event-db
@@ -409,14 +466,19 @@
 
 (re-frame/reg-event-db
  :send-sparql
- (let [query (re-frame/subscribe [:sparql])]
-   (fn [db _]
+ (fn [db _]
+   (let [cat-as (:cat-qa db)
+         cat-bs (:cat-qb db)
+         filtered (:filtered-cats db)
+         ;; p (println cat-bs)
+         all-cats (map #(:p (nth (:cat-bs db) %)) cat-bs)
+         query (make-query (map :label (:datasets db)) all-cats)]
      ;; (js/alert (str "Query is: " (:sparql db)))
      ;; (re-frame/dispatch [:set-chart-data {:date {:labels []
      ;;                                             :datasets [{:data []
      ;;                                                         :label "Value"}]}}])
      (POST (str HOST "/query/")
-           {:params {:sparql @query}
+           {:params {:sparql query}
             :format :json
             :access-control-allow-origin "*"
             :access-control-allow-methods "GET, POST"
@@ -424,7 +486,7 @@
             :handler #(re-frame/dispatch [:query-response-handler %1])
             :error-handler #(re-frame/dispatch [:error-handler %1])})
 
-     db)))
+     (assoc db :all-cats all-cats))))
 
 
 (re-frame/reg-event-db
@@ -456,6 +518,24 @@
           :error-handler #(re-frame/dispatch [:error-handler %1])})
 
    db))
+
+(re-frame/reg-event-db
+ :error-modal
+ (fn [db [_ message]]
+     (assoc db :error-msg message)))
+
+(re-frame/reg-event-db
+ :dismiss-error
+ (fn [db _]
+   (assoc db :error-msg nil)))
+
+
+
+(re-frame/reg-event-db
+ :toggle-locals-modal
+ (fn [db _]
+   (let [visible? (:show-locals-modal db)]
+     (assoc db :show-locals-modal (if visible? false true)))))
 
 (re-frame/reg-event-db
  :delete-datasets
@@ -513,14 +593,14 @@
                                               "                          ?url rdfs:label ?label}}")])
      (re-frame/dispatch [:send-sparql-b])
      (let [urls (re-frame/subscribe [:data-urls])]
-       (println (str "URLS:" @urls))
+       ;; (println (str "URLS:" @urls))
        (if (not (seq @urls))
          (do
            (js/setTimeout (fn [] (re-frame/dispatch [:get-datasets])) 2000)
            db)
          (do
            (js/setTimeout (fn [] (re-frame/dispatch [:get-datasets])) 6000)
-           (assoc db :datasets (map-indexed #(hash-map :id (str %1) :label (:label %2)) @urls)))
+           (assoc db :datasets (map-indexed #(hash-map :id (str %1) :label (:label %2) :url (:url %2)) @urls)))
          )
        )
      )))

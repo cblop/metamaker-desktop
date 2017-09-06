@@ -1,4 +1,4 @@
-@prefix: <http://www.cs.bath.ac.uk/dm4t/dataset/dddd/> .
+@prefix: <http://www.cs.bath.ac.uk/dm4t/dataset/test2/> .
 @prefix csv:<http://www.ntnu.no/ub/data/csv#> .
 @prefix dm4t:<http://www.cs.bath.ac.uk/dm4t#> .
 @prefix rdfs:<http://www.w3.org/2000/01/rdf-schema#> .
@@ -8,9 +8,9 @@
 @prefix ssn:<http://purl.oclc.org/NET/ssnx/ssn#> .
 
 
-<http://localhost:3030/ds/test.csv> a csv:CsvDocument ;
-  rdfs:label "dddd" ;
-  rdfs:comment "iiid" ;
+<http://localhost:3030/ds/test1.csv> a csv:CsvDocument ;
+  rdfs:label "test2" ;
+  rdfs:comment "Test dataset 2" ;
   csv:hasColumn :column0 ;
   csv:hasColumn :column1 ;
   csv:hasColumn :column2 ;
@@ -19,6 +19,7 @@
   csv:hasColumn :column5 .
 
 :column0 a csv:Column ;
+  csv:mapsTo xsd:dateTimeStamp ;
   csv:hasIndex "0" .
 
 :column1 a csv:Column ;
@@ -28,6 +29,7 @@
   csv:hasIndex "2" .
 
 :column3 a csv:Column ;
+  csv:mapsTo dm4t:appliance ;
   csv:hasIndex "3" .
 
 :column4 a csv:Column ;

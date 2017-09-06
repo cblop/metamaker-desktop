@@ -10,7 +10,7 @@
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]))
 
-;; (def root "fuseki/repos/metamaker-desktop/public")
+(def root "resources/public")
 (def HOST "http://localhost:3030")
 
 (defn put-triples-graph [gname triplefile]
@@ -36,8 +36,8 @@
     (spit "resources/test.ttl" data)
     (put-triples-graph gname "../../test.ttl")))
 
-;; (defn get-file [fname]
-;;   (file-response fname {:root (str root "/datasets")}))
+(defn get-file [fname]
+  (file-response fname {:root (str root "/datasets")}))
 
 (defroutes app-routes
   (GET "/" [] (file-response "index.html" {:root "resources/public"}))

@@ -32,4 +32,4 @@ return metamaker_desktop.cljs.mount_root.call(null);
 });
 goog.exportSymbol('metamaker_desktop.cljs.init', metamaker_desktop.cljs.init);
 
-//# sourceMappingURL=cljs.js.map?rel=1503928315038
+//# sourceMappingURL=cljs.js.map?rel=1504702198109
