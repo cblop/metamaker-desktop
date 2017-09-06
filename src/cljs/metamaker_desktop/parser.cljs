@@ -58,8 +58,9 @@
                                                                    ))) "")
           srate (js/parseInt @(re-frame/subscribe [:srate]))]
       (do
-        (if-not (or (= row-str "") (zero? @line-no)) ; don't want the header line
-          (reset! csv-rows (conj @csv-rows row-str)))
+        (if (= 0 (mod @line-no srate))
+          (if-not (or (= row-str "") (zero? @line-no)) ; don't want the header line
+            (reset! csv-rows (conj @csv-rows row-str))))
         ;; (println @csv-rows)
         ;; (println clj-results)
         ;; (println cs)
@@ -101,22 +102,32 @@
                     })))
 
 
-(defn parse-local [fobj fname dataset cols all-cols]
+
+(defn parse-local [fobj fname dataset cols all-cols last?]
+  (.parse js/Papa fobj
+          (clj->js {
+                    :download false
+                    :dynamicTyping true
+                    :step (stepfn {:f fname :d dataset :cs cols :all-cs all-cols})
+                    :complete #(do (reset! line-no 0)
+                                   ;; (println @csv-rows)
+                                   (if last? (re-frame/dispatch [:download-csv @csv-rows]))
+                                   ;; (re-frame/dispatch [:download-csv @csv-rows])
+                                   )
+                    :header false
+                    ;; :worker true
+                    ;; :preview size
+                    })))
+
+
+(defn parse-locals [data all-cols]
   (do
     (reset! csv-rows [(str "dm4t:file\tdm4t:dataset" (apply str (for [k (sort (keys all-cols))]
                                                                   (str "\t" (get all-cols k)))))])
-    (.parse js/Papa fobj
-            (clj->js {
-                      :download false
-                      :dynamicTyping true
-                      :step (stepfn {:f fname :d dataset :cs cols :all-cs all-cols})
-                      :complete #(do (reset! line-no 0)
-                                    (println @csv-rows)
-                                    (re-frame/dispatch [:download-csv @csv-rows]))
-                      :header false
-                      ;; :worker true
-                      ;; :preview size
-                      }))))
+    (doseq [d data] (apply parse-local d))
+    true
+    ;; @csv-rows
+    ))
 
 
 ;; (defn parse-stream [fname]

@@ -432,7 +432,8 @@
          ;; x (get-in j [:results :bindings 0 :x :value])
          ;; y (get-in j [:results :bindings 1 :y :value])
          locals (if (seq ds) (for [d ds] (first (array-seq (.-files (.getElementById js/document d))))) nil)
-         ldata (map vector locals fs ds col-map (repeat lcats))
+         ldata (map vector locals fs ds col-map (repeat lcats) (conj (into [] (repeat (dec (count locals)) false)) true))
+         ;; parsed (parser/parse-locals ldata lcats)
          ;; local (if (.getElementById js/document "file") (first (array-seq (.-files (.getElementById js/document "file")))) nil)
          ]
      ;; (println response)
@@ -442,10 +443,13 @@
      ;;   (parser/parse-local local)
      ;;   (parser/parse-stream f))
      ;; (assoc (assoc (assoc db :response response) :x x) :y y)
-     (println lcats)
-     (println locals)
-     (doseq [l ldata]
-       (apply parser/parse-local l))
+     ;; (println lcats)
+     ;; (println locals)
+     (parser/parse-locals ldata lcats)
+     ;; (doseq [l ldata]
+     ;;   (apply parser/parse-local l))
+     ;; (println parsed)
+     ;; (re-frame/dispatch [:download-csv parsed])
      db
      )))
 
