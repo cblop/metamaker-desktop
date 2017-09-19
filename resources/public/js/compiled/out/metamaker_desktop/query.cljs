@@ -40,6 +40,7 @@
                    :children [[re-com/label :label "Please select the local files for the following:"]
                               (if locals
                                 [re-com/v-box
+                                 :gap "10px"
                                  :children [(for [l locals]
                                               [re-com/h-box
                                                :justify :center

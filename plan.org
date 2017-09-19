@@ -5,6 +5,7 @@
 ** TODO convert SPARQL to UNION
 ** TODO add file-wide metadata
 ** TODO test on REFIT data
+** TODO move file creation to server (too big for client)
 ** DONE fix adding datasets
    CLOSED: [2017-08-28 Mon 13:20]
 ** DONE fix multi-select

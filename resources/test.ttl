@@ -23,18 +23,19 @@
   csv:hasIndex "0" .
 
 :column1 a csv:Column ;
+  csv:mapsTo seas:house ;
   csv:hasIndex "1" .
 
 :column2 a csv:Column ;
   csv:hasIndex "2" .
 
 :column3 a csv:Column ;
-  csv:mapsTo dm4t:appliance ;
   csv:hasIndex "3" .
 
 :column4 a csv:Column ;
   csv:hasIndex "4" .
 
 :column5 a csv:Column ;
+  csv:mapsTo ssn:hasValue ;
   csv:hasIndex "5" .
 

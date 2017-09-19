@@ -69,6 +69,7 @@
         (reset! line-no (inc @line-no))))))
 
 
+
 (defn complete [results, parser]
   (let [clj-results (:data (js->clj results :keywordize-keys true))]
     (do
@@ -103,28 +104,40 @@
 
 
 
-(defn parse-local [fobj fname dataset cols all-cols last?]
-  (.parse js/Papa fobj
-          (clj->js {
-                    :download false
-                    :dynamicTyping true
-                    :step (stepfn {:f fname :d dataset :cs cols :all-cs all-cols})
-                    :complete #(do (reset! line-no 0)
-                                   ;; (println @csv-rows)
-                                   (if last? (re-frame/dispatch [:download-csv @csv-rows]))
-                                   ;; (re-frame/dispatch [:download-csv @csv-rows])
-                                   )
-                    :header false
-                    ;; :worker true
-                    ;; :preview size
-                    })))
+(defn parse-local [[fobj fname dataset cols all-cols :as data]]
+  (let [fobj (nth (first data) 0)
+        fname (nth (first data) 1)
+        dataset (nth (first data) 2)
+        cols (nth (first data) 3)
+        all-cols (nth (first data) 4)]
+    (.parse js/Papa fobj
+            (clj->js {
+                      :download false
+                      :dynamicTyping true
+                      :step (stepfn {:f fname :d dataset :cs cols :all-cs all-cols})
+                      :complete #(do (reset! line-no 0)
+                                     ;; (println last?)
+                                     ;; (println (second @csv-rows))
+                                     (println (last @csv-rows))
+                                     (if (= (count data) 1) (re-frame/dispatch [:download-csv @csv-rows])
+                                         (parse-local (rest data)))
+                                     ;; (re-frame/dispatch [:download-csv @csv-rows])
+                                     )
+                      :header false
+                      ;; :worker true
+                      ;; :preview size
+                      }))))
 
 
 (defn parse-locals [data all-cols]
   (do
     (reset! csv-rows [(str "dm4t:file\tdm4t:dataset" (apply str (for [k (sort (keys all-cols))]
                                                                   (str "\t" (get all-cols k)))))])
-    (doseq [d data] (apply parse-local d))
+    (parse-local data)
+    ;; (doall
+    ;;   (doseq [d (butlast data)] (apply parse-local (conj (into [] d) false)))
+    ;;   (apply parse-local (conj (into [] (last data)) true))
+    ;;   )
     true
     ;; @csv-rows
     ))

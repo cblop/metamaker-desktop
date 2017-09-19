@@ -6,8 +6,8 @@ metamaker_desktop.repl.db = re_frame.core.subscribe.call(null,new cljs.core.Pers
 metamaker_desktop.repl.data = re_frame.core.subscribe.call(null,new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"chart-data","chart-data",-1181877206)], null));
 new cljs.core.Keyword(null,"chart-data","chart-data",-1181877206).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,metamaker_desktop.repl.db));
 new cljs.core.Keyword(null,"cat-qa","cat-qa",89152413).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,metamaker_desktop.repl.db));
-cljs.core.map.call(null,(function (p1__58442_SHARP_){
-return new cljs.core.Keyword(null,"p","p",151049309).cljs$core$IFn$_invoke$arity$1(cljs.core.nth.call(null,new cljs.core.Keyword(null,"cat-bs","cat-bs",-1717422172).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,metamaker_desktop.repl.db)),p1__58442_SHARP_));
+cljs.core.map.call(null,(function (p1__9567_SHARP_){
+return new cljs.core.Keyword(null,"p","p",151049309).cljs$core$IFn$_invoke$arity$1(cljs.core.nth.call(null,new cljs.core.Keyword(null,"cat-bs","cat-bs",-1717422172).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,metamaker_desktop.repl.db)),p1__9567_SHARP_));
 }),new cljs.core.Keyword(null,"cat-qb","cat-qb",1998287829).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,metamaker_desktop.repl.db)));
 new cljs.core.Keyword(null,"selected-sets","selected-sets",989842372).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,metamaker_desktop.repl.db));
 new cljs.core.Keyword(null,"all-cats","all-cats",627450712).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,metamaker_desktop.repl.db));
@@ -15,8 +15,8 @@ new cljs.core.Keyword(null,"all-cats","all-cats",627450712).cljs$core$IFn$_invok
  * true if coll contains elm
  */
 metamaker_desktop.repl.in_QMARK_ = (function metamaker_desktop$repl$in_QMARK_(coll,elm){
-return cljs.core.some.call(null,(function (p1__58443_SHARP_){
-return cljs.core._EQ_.call(null,elm,p1__58443_SHARP_);
+return cljs.core.some.call(null,(function (p1__9568_SHARP_){
+return cljs.core._EQ_.call(null,elm,p1__9568_SHARP_);
 }),coll);
 });
 metamaker_desktop.repl.in_QMARK_.call(null,new cljs.core.Keyword(null,"selected-sets","selected-sets",989842372).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,metamaker_desktop.repl.db)),"0");
@@ -36,8 +36,8 @@ new cljs.core.Keyword(null,"url","url",276297046).cljs$core$IFn$_invoke$arity$1(
 new cljs.core.Keyword(null,"metas","metas",-187243671).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,metamaker_desktop.repl.db));
 new cljs.core.Keyword(null,"datatypes","datatypes",-199835968).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,metamaker_desktop.repl.db));
 new cljs.core.Keyword(null,"datatypes","datatypes",-199835968).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,metamaker_desktop.repl.db));
-cljs.core.vec.call(null,cljs.core.set.call(null,cljs.core.map.call(null,(function (p1__58444_SHARP_){
-return cljs.core.get.call(null,p1__58444_SHARP_,new cljs.core.Keyword(null,"parent","parent",-878878779));
+cljs.core.vec.call(null,cljs.core.set.call(null,cljs.core.map.call(null,(function (p1__9569_SHARP_){
+return cljs.core.get.call(null,p1__9569_SHARP_,new cljs.core.Keyword(null,"parent","parent",-878878779));
 }),new cljs.core.Keyword(null,"data-types","data-types",-2140125264).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,metamaker_desktop.repl.db)))));
 cljs.core.map.call(null,new cljs.core.Keyword(null,"parent","parent",-878878779),new cljs.core.Keyword(null,"datatypes","datatypes",-199835968).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,metamaker_desktop.repl.db)));
 cljs.core.first.call(null,new cljs.core.Keyword(null,"datatypes","datatypes",-199835968).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,metamaker_desktop.repl.db)));
@@ -62,4 +62,4 @@ return cljs.core.println.call(null,[cljs.core.str("Row data:"),cljs.core.str(clj
 Papa.parse("http://mist.cs.bath.ac.uk/refit-cleaned/CLEAN_House1.csv",cljs.core.clj__GT_js.call(null,new cljs.core.PersistentArrayMap(null, 4, [new cljs.core.Keyword(null,"download","download",-300081668),true,new cljs.core.Keyword(null,"chunk","chunk",-1191159620),metamaker_desktop.repl.stepfn,new cljs.core.Keyword(null,"header","header",119441134),true,new cljs.core.Keyword(null,"preview","preview",451279890),(100)], null)));
 Papa.parse("/home/_mthom/DM4T/refit-clean/CLEAN_House1.csv",cljs.core.clj__GT_js.call(null,new cljs.core.PersistentArrayMap(null, 5, [new cljs.core.Keyword(null,"download","download",-300081668),true,new cljs.core.Keyword(null,"chunk","chunk",-1191159620),metamaker_desktop.repl.stepfn,new cljs.core.Keyword(null,"dynamic-typing","dynamic-typing",788095199),true,new cljs.core.Keyword(null,"header","header",119441134),true,new cljs.core.Keyword(null,"worker","worker",938239996),true], null)));
 
-//# sourceMappingURL=repl.js.map?rel=1504516549138
+//# sourceMappingURL=repl.js.map?rel=1505229166494

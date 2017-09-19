@@ -5,6 +5,7 @@
               [re-com.dropdown :refer [filter-choices-by-keyword]]
               [metamaker-desktop.meta :refer [make-triples]]
               [metamaker-desktop.subs :refer [make-query]]
+              [metamaker-desktop.query :refer [in?]]
               [metamaker-desktop.types :refer [detect-type]]
               [metamaker-desktop.db :as db]))
 
@@ -318,10 +319,12 @@
 
    db))
 
+
 (re-frame/reg-event-db
  :download-csv
  (fn [db [_ data]]
-   (download "out.csv" (apply str (interpose "\n" data)))
+   (println data)
+   (download "out.tsv" (apply str (interpose "\n" data)))
    db
    ))
 
@@ -432,7 +435,7 @@
          ;; x (get-in j [:results :bindings 0 :x :value])
          ;; y (get-in j [:results :bindings 1 :y :value])
          locals (if (seq ds) (for [d ds] (first (array-seq (.-files (.getElementById js/document d))))) nil)
-         ldata (map vector locals fs ds col-map (repeat lcats) (conj (into [] (repeat (dec (count locals)) false)) true))
+         ldata (map vector locals fs ds col-map (repeat lcats))
          ;; parsed (parser/parse-locals ldata lcats)
          ;; local (if (.getElementById js/document "file") (first (array-seq (.-files (.getElementById js/document "file")))) nil)
          ]
@@ -476,7 +479,8 @@
          filtered (:filtered-cats db)
          ;; p (println cat-bs)
          all-cats (map #(:p (nth (:cat-bs db) %)) cat-bs)
-         query (make-query (map :label (:datasets db)) all-cats)]
+         selected (filter #(and (in? (:selected-sets db) (:id %)) (re-find #"http://localhost" (:url %))) (:datasets db))
+         query (make-query (map :label selected) all-cats)]
      ;; (js/alert (str "Query is: " (:sparql db)))
      ;; (re-frame/dispatch [:set-chart-data {:date {:labels []
      ;;                                             :datasets [{:data []

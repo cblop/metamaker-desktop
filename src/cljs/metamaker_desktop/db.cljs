@@ -28,21 +28,21 @@
    :cat-bs [{:id 0 :cat-id "time" :label "Start Time" :p "ssn:startTime"}
             {:id 1 :cat-id "time" :label "End Time" :p "ssn:endTime"}
             {:id 2 :cat-id "time" :label "Timestamp" :p "xsd:dateTimeStamp"}
-            {:id 3 :cat-id "location" :label "Device" :p "dm4t:device"}
-            {:id 4 :cat-id "location" :label "Sensor" :p "dm4t:sensor"}
-            {:id 5 :cat-id "location" :label "Room" :p "dm4t:room"}
-            {:id 6 :cat-id "location" :label "House" :p "dm4t:house"}
-            {:id 7 :cat-id "location" :label "Appliance" :p "dm4t:appliance"}
+            {:id 3 :cat-id "location" :label "Device" :p "seas:device"}
+            {:id 4 :cat-id "location" :label "Sensor" :p "seas:sensor"}
+            {:id 5 :cat-id "location" :label "Room" :p "seas:room"}
+            {:id 6 :cat-id "location" :label "House" :p "seas:house"}
+            {:id 7 :cat-id "location" :label "Appliance" :p "seas:appliance"}
             {:id 8 :cat-id "value" :label "Value" :p "ssn:hasValue"}
-            {:id 9 :cat-id "value" :label "Maximum Value" :p "dm4t:maxValue"}
-            {:id 10 :cat-id "value" :label "Minimum Value" :p "dm4t:minValue"}
-            {:id 11 :cat-id "value" :label "Mean Value" :p "dm4t:meanValue"}
-            {:id 12 :cat-id "type" :label "Power (Watts)" :p "dm4t:powerReading"}
-            {:id 13 :cat-id "type" :label "Humidity (relative)" :p "dm4t:humidityReading"}
-            {:id 14 :cat-id "type" :label "Gas" :p "dm4t:gasReading"}
-            {:id 15 :cat-id "type" :label "CO2" :p "dm4t:co2Reading"}
-            {:id 16 :cat-id "type" :label "Light" :p "dm4t:lightReading"}
-            {:id 17 :cat-id "type" :label "Motion (PIR)" :p "dm4t:motionReading"}
+            {:id 9 :cat-id "value" :label "Maximum Value" :p "seas:maxValue"}
+            {:id 10 :cat-id "value" :label "Minimum Value" :p "seas:minValue"}
+            {:id 11 :cat-id "value" :label "Mean Value" :p "seas:meanValue"}
+            {:id 12 :cat-id "type" :label "Power (Watts)" :p "seas:powerReading"}
+            {:id 13 :cat-id "type" :label "Humidity (relative)" :p "seas:humidityReading"}
+            {:id 14 :cat-id "type" :label "Gas" :p "seas:gasReading"}
+            {:id 15 :cat-id "type" :label "CO2" :p "seas:co2Reading"}
+            {:id 16 :cat-id "type" :label "Light" :p "seas:lightReading"}
+            {:id 17 :cat-id "type" :label "Motion (PIR)" :p "seas:motionReading"}
             ]
    :sparql "PREFIX csv:<http://www.ntnu.no/ub/data/csv#>
 PREFIX ssn:<http://purl.oclc.org/NET/ssnx/ssn#>
@@ -87,26 +87,26 @@ WHERE {{
                {:cat-b "Device"
                 :cat-a "Location"
                 :type :string
-                :p "dm4t:device"}
+                :p "seas:device"}
                {:cat-b "Sensor"
                 :cat-a "Location"
                 :type :string
-                :p "dm4t:sensor"}
+                :p "seas:sensor"}
                {
                 :cat-b "Room"
                 :cat-a "Location"
                 :type :string
-                :p "dm4t:room"}
+                :p "seas:room"}
                {:cat-b "House"
                 :cat-a "Location"
                 :type :string
-                :p "dm4t:house"
+                :p "seas:house"
                 }
                {
                 :cat-b "Appliance"
                 :cat-a "Location"
                 :type :string
-                :p "dm4t:appliance"}
+                :p "seas:appliance"}
                {:cat-b "Value"
                 :cat-a "Value"
                 :type :float
@@ -114,40 +114,40 @@ WHERE {{
                {:cat-b "Maximum Value"
                 :cat-a "Value"
                 :type :float
-                :p "dm4t:maxValue"}
+                :p "seas:maxValue"}
                {:cat-b "Minimum Value"
                 :cat-a "Value"
                 :type :float
-                :p "dm4t:minValue"}
+                :p "seas:minValue"}
                {:cat-b "Mean Value"
                 :cat-a "Value"
                 :type :float
-                :p "dm4t:meanValue"}
+                :p "seas:meanValue"}
                {:cat-b "Power (Watts)"
                 :cat-a "Type"
                 :type :float
-                :p "dm4t:powerReading"}
+                :p "seas:powerReading"}
                {:cat-b "Humidity (relative)"
                 :cat-a "Type"
                 :type :float
                 :p "rdf:a"
-                :o "dm4t:humidityReading"}
+                :o "seas:humidityReading"}
                {:cat-b "Gas"
                 :cat-a "Type"
                 :type :float
-                :p "dm4t:gasReading"}
+                :p "seas:gasReading"}
                {:cat-b "CO2"
                 :cat-a "Type"
                 :type :float
-                :p "dm4t:co2Reading"}
+                :p "seas:co2Reading"}
                {:cat-b "Light"
                 :cat-a "Type"
                 :type :float
-                :p "dm4t:lightReading"}
+                :p "seas:lightReading"}
                {:cat-b "Motion (PIR)"
                 :cat-a "Type"
                 :type :float
-                :p "dm4t:motionReading"}
+                :p "seas:motionReading"}
                ]
    :metas []
    :file-metas []
